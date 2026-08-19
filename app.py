@@ -45,9 +45,10 @@ def buscar_turmas():
 
         alunos_todos = api_solis.carregar_base_geral_alunos()
         if not alunos_todos:
+            msg_detalhada = api_solis.ultimo_erro or "Não foi possível obter dados do SolisGE. Verifique se o usuário/senha no Render estão corretos."
             return jsonify({
                 "sucesso": False,
-                "erro": "⚠️ Não foi possível obter dados do SolisGE. Verifique se o usuário/senha no Render estão corretos ou se o SolisGE exige VPN/rede local."
+                "erro": f"⚠️ {msg_detalhada}"
             })
 
         termo_upper = remover_acentos(termo)

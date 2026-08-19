@@ -93,11 +93,17 @@ class SolisAPI:
         self.password = os.getenv("SOLIS_WEB_PASSWORD", "")
         self.token = os.getenv("SOLIS_JWT_TOKEN", "")
         self._cache_base_alunos = None
+        self.ultimo_erro = ""
 
     def autenticar(self):
         """Realiza a autenticação dinâmica na API SolisGE para obter um JWT Token válido."""
+        self.user = os.getenv("SOLIS_WEB_USER", self.user)
+        self.password = os.getenv("SOLIS_WEB_PASSWORD", self.password)
+        self.base_url = os.getenv("SOLIS_API_URL", self.base_url).rstrip("/")
+
         if not self.user or not self.password:
-            print("⚠️ Usuário ou senha não encontrados no arquivo .env. Usando token salvo...")
+            self.ultimo_erro = "As variáveis SOLIS_WEB_USER e SOLIS_WEB_PASSWORD estão vazias no Render. Cadastre-as na aba Environment Variables."
+            print("⚠️ Usuário ou senha não encontrados no arquivo .env / Render.")
             return bool(self.token)
 
         auth_url = f"{self.base_url}/api/autenticar"
@@ -110,13 +116,18 @@ class SolisAPI:
             )
             if resp.status_code == 200:
                 self.token = resp.json()
+                self.ultimo_erro = ""
                 print("✅ Autenticação realizada com sucesso!")
                 return True
             else:
-                print(f"⚠️ Falha na autenticação HTTP {resp.status_code}: {resp.text}")
+                self.ultimo_erro = f"Falha na autenticação SolisGE (HTTP {resp.status_code}): {resp.text}"
+                print(f"⚠️ {self.ultimo_erro}")
+                return False
         except Exception as e:
-            print(f"⚠️ Erro ao tentar autenticar no SolisGE ({e}).")
-        
+            self.ultimo_erro = f"Erro de rede ao conectar ao SolisGE ({auth_url}): {str(e)}"
+            print(f"⚠️ {self.ultimo_erro}")
+            return False
+
         return bool(self.token)
 
     def obter_headers(self):
