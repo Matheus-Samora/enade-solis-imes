@@ -52,7 +52,7 @@ def diagnostico():
                 # 2. Teste de Chamada ao Relatório Genérico
                 rep_url = f"{base_url}/api/basico/relatorio-generico/gerar/{report_id}"
                 headers = {"X-Token": token, "Content-Type": "application/json"}
-                resp_rep = requests.get(rep_url, headers=headers, json={"par": {}}, timeout=25)
+                resp_rep = requests.get(rep_url, headers=headers, json={"par": {}}, timeout=180)
                 diagnostico_info["report_status_code"] = resp_rep.status_code
                 if resp_rep.status_code == 200:
                     data_rep = resp_rep.json()

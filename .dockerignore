@@ -1,0 +1,14 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.git/
+.gitignore
+Planilha1_*.xlsx
+Planilha2_*.xlsx
+Planilha1_*.csv
+Planilha2_*.csv
+ENADE2611101_*.zip
+ENADE2611101_*.txt
+.vscode/
+.idea/
