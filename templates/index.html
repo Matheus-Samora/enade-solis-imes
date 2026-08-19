@@ -150,19 +150,26 @@
                     body: JSON.stringify({ termo: termo })
                 });
 
-                const data = await response.json();
                 document.getElementById('loaderBusca').classList.add('hidden');
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    alert(`⚠️ Erro no servidor (${response.status}): Por favor, verifique se as variáveis SOLIS_WEB_USER e SOLIS_WEB_PASSWORD foram cadastradas no painel do Render.`);
+                    return;
+                }
+
+                const data = await response.json();
 
                 if (data.sucesso && data.turmas.length > 0) {
                     turmasCache = data.turmas_map;
                     renderizarTurmas(data.turmas);
                     document.getElementById('containerTurmas').classList.remove('hidden');
                 } else {
-                    alert('Nenhuma turma com alunos matriculados foi encontrada para o termo: ' + termo);
+                    alert(data.erro || ('Nenhuma turma com alunos matriculados foi encontrada para o termo: ' + termo));
                 }
             } catch (err) {
                 document.getElementById('loaderBusca').classList.add('hidden');
-                alert('Erro ao conectar com a API do sistema: ' + err.message);
+                alert('⚠️ Erro ao conectar com o servidor: ' + err.message);
             }
         }
 
@@ -224,8 +231,15 @@
                     body: JSON.stringify({ turmas: selecionadas, turmas_map: turmasCache })
                 });
 
-                const data = await response.json();
                 document.getElementById('loaderProcessamento').classList.add('hidden');
+
+                if (!response.ok) {
+                    const text = await response.text();
+                    alert(`⚠️ Erro no servidor (${response.status}): Falha no processamento. Verifique os logs do Render.`);
+                    return;
+                }
+
+                const data = await response.json();
 
                 if (data.sucesso && data.resultados.length > 0) {
                     renderizarResultadosIndividuais(data.resultados);
