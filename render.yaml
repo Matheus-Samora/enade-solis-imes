@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: enade-solis-imes
+    env: python
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn app:app
+    envVars:
+      - key: SOLIS_API_URL
+        value: https://academico.faculdadeimes.org.br
+      - key: SOLIS_REPORT_ID
+        value: "7720260819135105"
+      - key: SOLIS_WEB_USER
+        sync: false
+      - key: SOLIS_WEB_PASSWORD
+        sync: false

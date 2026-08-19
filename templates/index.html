@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema ENADE 2026 - Faculdade IMES</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800">
+
+    <!-- Header / Navbar -->
+    <header class="bg-indigo-700 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white text-indigo-700 p-2.5 rounded-xl shadow">
+                    <i class="fa-solid fa-graduation-cap text-2xl"></i>
+                </div>
+                <div>
+                    <h1 class="text-xl font-bold tracking-tight">Gerador ENADE 2026</h1>
+                    <p class="text-xs text-indigo-200">Faculdade IMES • Sistema Integrado SolisGE</p>
+                </div>
+            </div>
+            <div class="flex items-center space-x-2 bg-indigo-800/60 px-3 py-1.5 rounded-lg text-xs font-medium">
+                <span class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-pulse"></span>
+                <span>API SolisGE Conectada</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+        <!-- Banner Explicativo -->
+        <div class="bg-gradient-to-r from-indigo-600 to-blue-600 rounded-2xl p-6 text-white shadow-lg relative overflow-hidden">
+            <div class="relative z-10 max-w-3xl">
+                <h2 class="text-2xl font-bold mb-2">Painel Prático de Extração e Conversão ENADE</h2>
+                <p class="text-indigo-100 text-sm leading-relaxed">
+                    Pesquise a turma desejada pelo código (ex: <code class="bg-white/20 px-1.5 py-0.5 rounded text-white font-mono">202601</code>, <code class="bg-white/20 px-1.5 py-0.5 rounded text-white font-mono">202401</code>, <code class="bg-white/20 px-1.5 py-0.5 rounded text-white font-mono">STADS</code>), selecione quantas turmas desejar e baixe os arquivos individuais de cada turma.
+                </p>
+            </div>
+            <i class="fa-solid fa-file-invoice text-9xl absolute -right-4 -bottom-6 opacity-10"></i>
+        </div>
+
+        <!-- Seção 1: Pesquisa de Turmas -->
+        <div class="bg-white rounded-2xl p-6 shadow-sm border border-slate-200/80">
+            <h3 class="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                <i class="fa-solid fa-magnifying-glass text-indigo-600"></i>
+                <span>Passo 1: Pesquisar Turma no SolisGE</span>
+            </h3>
+
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <input type="text" id="termoBusca" placeholder="Digite o código da turma (ex: 202601, 202401, STADS)..." 
+                           class="w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-300 rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition font-medium text-slate-900 placeholder-slate-400">
+                    <i class="fa-solid fa-search absolute left-4 top-3.5 text-slate-400"></i>
+                </div>
+                <button onclick="buscarTurmas()" id="btnBuscar"
+                        class="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-indigo-500/20 transition flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-arrows-rotate"></i>
+                    <span>Buscar Turmas</span>
+                </button>
+            </div>
+
+            <!-- Loader de Busca -->
+            <div id="loaderBusca" class="hidden my-8 text-center py-6">
+                <div class="inline-block animate-spin rounded-full h-10 w-10 border-4 border-indigo-600 border-t-transparent mb-3"></div>
+                <p class="text-sm font-medium text-slate-600">Carregando dados da base SolisGE...</p>
+                <p class="text-xs text-slate-400 mt-1">Isso pode levar de 30 segundos a 2 minutos na primeira busca.</p>
+            </div>
+
+            <!-- Resultado de Turmas Encontradas -->
+            <div id="containerTurmas" class="hidden mt-6 space-y-4">
+                <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                    <h4 class="text-sm font-semibold text-slate-700 uppercase tracking-wider">Turmas Encontradas:</h4>
+                    <span id="badgeQtdTurmas" class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2.5 py-1 rounded-full">0 turmas</span>
+                </div>
+                
+                <div id="listaTurmasGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <!-- Cards de turmas serão injetados via JS -->
+                </div>
+
+                <div class="pt-4 flex justify-end">
+                    <button onclick="processarTurmasSelecionadas()" id="btnProcessar" disabled
+                            class="px-8 py-3.5 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold rounded-xl shadow-lg hover:shadow-emerald-500/20 transition flex items-center gap-3 text-base">
+                        <i class="fa-solid fa-bolt"></i>
+                        <span>Gerar Planilhas e Arquivo ZIP</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Seção 2: Loader de Processamento -->
+        <div id="loaderProcessamento" class="hidden bg-white rounded-2xl p-8 shadow-sm border border-slate-200 text-center space-y-4">
+            <div class="inline-block animate-spin rounded-full h-12 w-12 border-4 border-emerald-600 border-t-transparent"></div>
+            <h3 class="text-lg font-bold text-slate-800">Processando Turmas Selecionadas...</h3>
+            <p class="text-sm text-slate-500 max-w-md mx-auto">
+                Consultando dados cadastrais no SolisGE, calculando datas dinâmicas e convertendo cada turma para o modelo oficial do INEP.
+            </p>
+        </div>
+
+        <!-- Seção 3: Resultados e Downloads por Turma -->
+        <div id="containerResultados" class="hidden space-y-6">
+            <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 flex items-center space-x-3 text-emerald-800">
+                <i class="fa-solid fa-circle-check text-2xl text-emerald-600"></i>
+                <div>
+                    <h3 class="font-bold text-base">Processamento Concluído!</h3>
+                    <p class="text-xs text-emerald-700">Abaixo estão os downloads separados de cada turma selecionada.</p>
+                </div>
+            </div>
+
+            <!-- Grid de Resultados por Turma -->
+            <div id="resultadosTurmasContainer" class="space-y-6">
+                <!-- Injetado via JS -->
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-100 border-t border-slate-200 mt-12 py-6 text-center text-xs text-slate-500">
+        <p>Sistema Integrado SolisGE • Gerador Oficial ENADE 2026 • Faculdade IMES</p>
+    </footer>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        let turmasCache = {};
+
+        async function buscarTurmas() {
+            const termo = document.getElementById('termoBusca').value.trim();
+            if (!termo) {
+                alert('Por favor, digite o código ou nome da turma que deseja pesquisar.');
+                return;
+            }
+
+            document.getElementById('loaderBusca').classList.remove('hidden');
+            document.getElementById('containerTurmas').classList.add('hidden');
+            document.getElementById('containerResultados').classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/buscar-turmas', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ termo: termo })
+                });
+
+                const data = await response.json();
+                document.getElementById('loaderBusca').classList.add('hidden');
+
+                if (data.sucesso && data.turmas.length > 0) {
+                    turmasCache = data.turmas_map;
+                    renderizarTurmas(data.turmas);
+                    document.getElementById('containerTurmas').classList.remove('hidden');
+                } else {
+                    alert('Nenhuma turma com alunos matriculados foi encontrada para o termo: ' + termo);
+                }
+            } catch (err) {
+                document.getElementById('loaderBusca').classList.add('hidden');
+                alert('Erro ao conectar com a API do sistema: ' + err.message);
+            }
+        }
+
+        function renderizarTurmas(turmas) {
+            const grid = document.getElementById('listaTurmasGrid');
+            grid.innerHTML = '';
+            document.getElementById('badgeQtdTurmas').innerText = `${turmas.length} turma(s) encontrada(s)`;
+
+            turmas.forEach((t, idx) => {
+                const card = document.createElement('div');
+                card.className = 'bg-slate-50 p-4 rounded-xl border border-slate-200 flex items-center justify-between hover:border-indigo-300 transition cursor-pointer';
+                card.onclick = (e) => {
+                    if (e.target.tagName !== 'INPUT') {
+                        toggleCheckbox(idx);
+                    }
+                };
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" id="turma_cb_${idx}" value="${t.nome}" onchange="atualizarBotaoProcessar()" class="w-4 h-4 text-indigo-600 rounded focus:ring-indigo-500">
+                        <div>
+                            <p class="font-bold text-slate-800 text-sm">${t.nome}</p>
+                            <p class="text-xs text-slate-500">${t.qtd} alunos matriculados</p>
+                        </div>
+                    </div>
+                    <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2.5 py-1 rounded-full">${t.qtd}</span>
+                `;
+                grid.appendChild(card);
+            });
+
+            atualizarBotaoProcessar();
+        }
+
+        function toggleCheckbox(idx) {
+            const cb = document.getElementById(`turma_cb_${idx}`);
+            if (cb) {
+                cb.checked = !cb.checked;
+                atualizarBotaoProcessar();
+            }
+        }
+
+        function atualizarBotaoProcessar() {
+            const checkboxes = document.querySelectorAll('input[id^="turma_cb_"]:checked');
+            document.getElementById('btnProcessar').disabled = (checkboxes.length === 0);
+        }
+
+        async function processarTurmasSelecionadas() {
+            const checkboxes = document.querySelectorAll('input[id^="turma_cb_"]:checked');
+            const selecionadas = Array.from(checkboxes).map(cb => cb.value);
+
+            if (selecionadas.length === 0) return;
+
+            document.getElementById('loaderProcessamento').classList.remove('hidden');
+            document.getElementById('containerResultados').classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/processar-turma', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ turmas: selecionadas, turmas_map: turmasCache })
+                });
+
+                const data = await response.json();
+                document.getElementById('loaderProcessamento').classList.add('hidden');
+
+                if (data.sucesso && data.resultados.length > 0) {
+                    renderizarResultadosIndividuais(data.resultados);
+                    document.getElementById('containerResultados').classList.remove('hidden');
+                } else {
+                    alert('Erro ao processar turma: ' + (data.erro || 'Nenhum resultado retornado.'));
+                }
+            } catch (err) {
+                document.getElementById('loaderProcessamento').classList.add('hidden');
+                alert('Erro ao processar: ' + err.message);
+            }
+        }
+
+        function renderizarResultadosIndividuais(resultados) {
+            const container = document.getElementById('resultadosTurmasContainer');
+            container.innerHTML = '';
+
+            resultados.forEach(res => {
+                const cardTurma = document.createElement('div');
+                cardTurma.className = 'bg-white rounded-2xl p-6 shadow-sm border border-slate-200/90 space-y-6';
+
+                let previewRowsHtml = '';
+                res.preview.forEach(aluno => {
+                    previewRowsHtml += `
+                        <tr class="hover:bg-slate-50">
+                            <td class="px-4 py-2.5 font-semibold text-slate-800">${aluno.Aluno}</td>
+                            <td class="px-4 py-2.5 font-mono">${aluno.CPF}</td>
+                            <td class="px-4 py-2.5 font-medium text-indigo-700">${aluno.Polo}</td>
+                            <td class="px-4 py-2.5">${aluno["Ano de Inicio"]}</td>
+                            <td class="px-4 py-2.5">${aluno["Conclusao Ensino Medio"]}</td>
+                            <td class="px-4 py-2.5">${aluno["Previsão de Conclusao"]}</td>
+                            <td class="px-4 py-2.5">${aluno.Semestre}</td>
+                        </tr>
+                    `;
+                });
+
+                cardTurma.innerHTML = `
+                    <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="bg-indigo-100 text-indigo-700 p-2 rounded-xl">
+                                <i class="fa-solid fa-users-rectangle text-xl"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-base font-bold text-slate-900">${res.turma}</h4>
+                                <p class="text-xs text-slate-500">${res.qtd_alunos} alunos matriculados processados</p>
+                            </div>
+                        </div>
+                        <span class="bg-indigo-50 text-indigo-700 text-xs font-bold px-3 py-1 rounded-full border border-indigo-100">Turma Concluída</span>
+                    </div>
+
+                    <!-- Cards de Download da Turma -->
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        
+                        <!-- Planilha 1 -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col justify-between hover:border-indigo-300 transition">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="bg-indigo-100 text-indigo-700 text-xs font-bold px-2 py-0.5 rounded">PLANILHA 1</span>
+                                    <i class="fa-solid fa-file-excel text-emerald-600"></i>
+                                </div>
+                                <h5 class="font-bold text-slate-800 text-xs mb-1">Entrada Cadastral</h5>
+                                <p class="text-[11px] text-slate-500 mb-3">Base com Polo do Contrato e cadastro completo.</p>
+                            </div>
+                            <a href="${res.p1_download}" download class="w-full py-2 px-3 bg-white hover:bg-indigo-50 border border-indigo-200 text-indigo-700 font-semibold rounded-lg text-xs text-center transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-download"></i> Baixar Planilha 1 (.xlsx)
+                            </a>
+                        </div>
+
+                        <!-- Planilha 2 -->
+                        <div class="bg-slate-50 rounded-xl p-4 border border-slate-200 flex flex-col justify-between hover:border-emerald-300 transition">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="bg-emerald-100 text-emerald-700 text-xs font-bold px-2 py-0.5 rounded">PLANILHA 2</span>
+                                    <i class="fa-solid fa-file-csv text-blue-600"></i>
+                                </div>
+                                <h5 class="font-bold text-slate-800 text-xs mb-1">Modelo Convertido ENADE</h5>
+                                <p class="text-[11px] text-slate-500 mb-3">13 colunas com IBGE e regras dinâmicas.</p>
+                            </div>
+                            <a href="${res.p2_download}" download class="w-full py-2 px-3 bg-white hover:bg-emerald-50 border border-emerald-200 text-emerald-700 font-semibold rounded-lg text-xs text-center transition flex items-center justify-center gap-1.5">
+                                <i class="fa-solid fa-download"></i> Baixar Planilha 2 (.xlsx)
+                            </a>
+                        </div>
+
+                        <!-- Arquivo ZIP INEP -->
+                        <div class="bg-slate-900 text-white rounded-xl p-4 shadow flex flex-col justify-between">
+                            <div>
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="bg-emerald-500 text-white text-xs font-bold px-2 py-0.5 rounded">UPLOAD INEP</span>
+                                    <i class="fa-solid fa-file-zipper text-yellow-400"></i>
+                                </div>
+                                <h5 class="font-bold text-white text-xs mb-1">Arquivo ZIP Oficial</h5>
+                                <p class="text-[11px] text-slate-400 mb-3">${res.nome_zip || 'ZIP Formatado para o INEP'}</p>
+                            </div>
+                            <a href="${res.zip_download}" download class="w-full py-2 px-3 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-lg text-xs text-center transition flex items-center justify-center gap-1.5 shadow">
+                                <i class="fa-solid fa-cloud-arrow-down"></i> Baixar Arquivo ZIP (.zip)
+                            </a>
+                        </div>
+
+                    </div>
+
+                    <!-- Tabela Preview -->
+                    <div class="pt-2">
+                        <h5 class="text-xs font-bold text-slate-700 mb-2">Alunos da Turma (${res.turma}):</h5>
+                        <div class="overflow-x-auto rounded-lg border border-slate-200">
+                            <table class="w-full text-xs text-left text-slate-600">
+                                <thead class="text-[11px] text-slate-700 uppercase bg-slate-100 font-semibold">
+                                    <tr>
+                                        <th class="px-4 py-2">Aluno</th>
+                                        <th class="px-4 py-2">CPF</th>
+                                        <th class="px-4 py-2">Polo Contratual</th>
+                                        <th class="px-4 py-2">Ano Início</th>
+                                        <th class="px-4 py-2">Conclusão Médio</th>
+                                        <th class="px-4 py-2">Formatura</th>
+                                        <th class="px-4 py-2">Semestre</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-slate-100 bg-white">
+                                    ${previewRowsHtml}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(cardTurma);
+            });
+        }
+    </script>
+</body>
+</html>
