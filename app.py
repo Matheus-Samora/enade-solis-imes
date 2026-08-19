@@ -32,9 +32,9 @@ def buscar_turmas():
         if not termo:
             return jsonify({"sucesso": False, "erro": "Termo de busca não informado."})
 
-        # Re-inicializa credenciais dinamicamente caso o arquivo .env ou Render env vars tenham mudado
-        api_solis.user = os.getenv("SOLIS_WEB_USER", "")
-        api_solis.password = os.getenv("SOLIS_WEB_PASSWORD", "")
+        # Re-inicializa credenciais dinamicamente com fallbacks diretos do SolisGE
+        api_solis.user = os.getenv("SOLIS_WEB_USER", "12638612618")
+        api_solis.password = os.getenv("SOLIS_WEB_PASSWORD", "samora34892")
         api_solis.base_url = os.getenv("SOLIS_API_URL", "https://academico.faculdadeimes.org.br").rstrip("/")
 
         if not api_solis.user or not api_solis.password:

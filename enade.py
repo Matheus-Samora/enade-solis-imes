@@ -89,22 +89,21 @@ class SolisAPI:
     """Classe para gerenciar autenticação e chamadas da API do SolisGE."""
     def __init__(self):
         self.base_url = os.getenv("SOLIS_API_URL", "https://academico.faculdadeimes.org.br").rstrip("/")
-        self.user = os.getenv("SOLIS_WEB_USER", "")
-        self.password = os.getenv("SOLIS_WEB_PASSWORD", "")
+        self.user = os.getenv("SOLIS_WEB_USER", "12638612618")
+        self.password = os.getenv("SOLIS_WEB_PASSWORD", "samora34892")
         self.token = os.getenv("SOLIS_JWT_TOKEN", "")
         self._cache_base_alunos = None
         self.ultimo_erro = ""
 
     def autenticar(self):
         """Realiza a autenticação dinâmica na API SolisGE para obter um JWT Token válido."""
-        self.user = os.getenv("SOLIS_WEB_USER", self.user)
-        self.password = os.getenv("SOLIS_WEB_PASSWORD", self.password)
-        self.base_url = os.getenv("SOLIS_API_URL", self.base_url).rstrip("/")
+        self.user = os.getenv("SOLIS_WEB_USER", "12638612618")
+        self.password = os.getenv("SOLIS_WEB_PASSWORD", "samora34892")
+        self.base_url = os.getenv("SOLIS_API_URL", "https://academico.faculdadeimes.org.br").rstrip("/")
 
         if not self.user or not self.password:
-            self.ultimo_erro = "As variáveis SOLIS_WEB_USER e SOLIS_WEB_PASSWORD estão vazias no Render. Cadastre-as na aba Environment Variables."
-            print("⚠️ Usuário ou senha não encontrados no arquivo .env / Render.")
-            return bool(self.token)
+            self.user = "12638612618"
+            self.password = "samora34892"
 
         auth_url = f"{self.base_url}/api/autenticar"
         print(f"🔑 Autenticando na API SolisGE ({auth_url})...")
