@@ -3,7 +3,7 @@ services:
     name: enade-solis-imes
     env: python
     buildCommand: pip install -r requirements.txt
-    startCommand: gunicorn app:app
+    startCommand: gunicorn app:app --timeout 600 --workers 2
     envVars:
       - key: SOLIS_API_URL
         value: https://academico.faculdadeimes.org.br
