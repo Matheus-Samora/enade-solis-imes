@@ -23,6 +23,52 @@ api_solis = SolisAPI()
 def index():
     return render_template("index.html")
 
+@app.route("/api/diagnostico")
+def diagnostico():
+    import requests
+    diagnostico_info = {}
+    
+    user = os.getenv("SOLIS_WEB_USER", "12638612618")
+    password = os.getenv("SOLIS_WEB_PASSWORD", "samora34892")
+    base_url = os.getenv("SOLIS_API_URL", "https://academico.faculdadeimes.org.br").rstrip("/")
+    report_id = os.getenv("SOLIS_REPORT_ID", "7720260819135105")
+
+    diagnostico_info["user_configurado"] = user
+    diagnostico_info["url_configurada"] = base_url
+    diagnostico_info["report_id_configurado"] = report_id
+
+    # 1. Teste de Autenticação na API do SolisGE
+    try:
+        auth_url = f"{base_url}/api/autenticar"
+        resp_auth = requests.post(auth_url, data={"user": user, "password": password}, timeout=15)
+        diagnostico_info["auth_status_code"] = resp_auth.status_code
+        diagnostico_info["auth_response_preview"] = resp_auth.text[:300]
+        
+        if resp_auth.status_code == 200:
+            try:
+                token = resp_auth.json()
+                diagnostico_info["token_obteve"] = True
+                
+                # 2. Teste de Chamada ao Relatório Genérico
+                rep_url = f"{base_url}/api/basico/relatorio-generico/gerar/{report_id}"
+                headers = {"X-Token": token, "Content-Type": "application/json"}
+                resp_rep = requests.get(rep_url, headers=headers, json={"par": {}}, timeout=25)
+                diagnostico_info["report_status_code"] = resp_rep.status_code
+                if resp_rep.status_code == 200:
+                    data_rep = resp_rep.json()
+                    diagnostico_info["report_qtd_registros"] = len(data_rep) if isinstance(data_rep, list) else "Não é lista"
+                else:
+                    diagnostico_info["report_response_preview"] = resp_rep.text[:300]
+            except Exception as e_json:
+                diagnostico_info["token_obteve"] = False
+                diagnostico_info["erro_json_auth"] = str(e_json)
+        else:
+            diagnostico_info["token_obteve"] = False
+    except Exception as e:
+        diagnostico_info["erro_conexao"] = str(e)
+
+    return jsonify(diagnostico_info)
+
 @app.route("/api/buscar-turmas", methods=["POST"])
 def buscar_turmas():
     try:
